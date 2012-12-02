@@ -9,78 +9,73 @@ import java.security.SignatureException;
 import java.security.cert.*;
 
 
+enum validity {Valid, Expired, NotYetValid, InvalidAlgorithm, InvalidKey, InvalidSignature, CertificateException};
+
 public class CertHandler {
 	
 	X509Certificate certificate;
-	X509Certificate ca;
 
-	String set_certificate(X509Certificate cert, X509Certificate certAuthority)
+	/*
+	 * Important: the return value of this function must be checked.  This 
+	 * function validates the certificate and ensures it has been signed by
+	 * the given certificate authority.
+	 */
+	validity set_certificate(X509Certificate cert)
 	{
 		
 		certificate = cert;
-		ca = certAuthority;
 		
 		// Verify time
+		// Future Work: Certificates are only self-signed
 		try {
 			cert.checkValidity();
 		} catch (CertificateExpiredException e) {
-			return "Certificate Expired";
+			return validity.Expired;
 		} catch (CertificateNotYetValidException e) {
-			return "Certificate Not Yet Valid";
+			return validity.NotYetValid;
 		}
 		
-		try {
-			cert.verify(ca.getPublicKey());
-		} catch (InvalidKeyException e) {
-			return "Invalid Key";
-		} catch (CertificateException e) {
-			return "Certificate Exception";
-		} catch (NoSuchAlgorithmException e) {
-			return "Invalid Certificate Algorithm";
-		} catch (NoSuchProviderException e) {
-			return "Invalid Certificate Provider";
-		} catch (SignatureException e) {
-			return "Invalid Certificate Signature";
-		}
-		
-		return "Valid";
+		return validity.Valid;
 		
 	}
 	
 	
-	boolean verify_signature(byte[] shortString, byte[] signature)
+	validity check_valid_signature(byte[] shortString, byte[] signature)
 	{
 		
-		PublicKey pubKeyRSA = certificate.getPublicKey();
-		boolean res;
+		PublicKey key = certificate.getPublicKey();
 		Signature sig;
+		
 		try {
-			sig = Signature.getInstance("SHA1withRSA", "FlexiCore");
+			sig = Signature.getInstance("SHA1withRSA");
 		} catch (NoSuchAlgorithmException e1) {
-			return false;
-		} catch (NoSuchProviderException e1) {
-			return false;
+			return validity.InvalidAlgorithm;
 		}
 		
 		try {
-			sig.initVerify(pubKeyRSA);
+			sig.initVerify(key);
 		} catch (InvalidKeyException e) {
-			return false;
+			return validity.InvalidKey;
 		}
 		
 		try {
 			sig.update(shortString);
 		} catch (SignatureException e1) {
-			return false;
+			return validity.InvalidSignature;
 		}
 		
+		boolean valid;
 		try {
-			 res = sig.verify(signature);
+			 valid = sig.verify(signature);
 		} catch (SignatureException e) {
-			return false;
+			return validity.InvalidSignature;
 		}
-
-		return res;
+		
+		
+		if(valid)
+			return validity.Valid;
+		else
+			return validity.InvalidSignature;
 		
 	}
 }
