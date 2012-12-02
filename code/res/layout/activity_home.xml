@@ -1,0 +1,63 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".HomeActivity" >
+
+    <TextView
+        android:id="@+id/ssidValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/ssid"
+        android:layout_alignBottom="@+id/ssid"
+        android:layout_alignLeft="@+id/shortStringValue"
+        android:text="-"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <Button
+        android:id="@+id/about"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:text="About AP Verifier" />
+
+    <Button
+        android:id="@+id/calculate"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/about"
+        android:layout_alignParentLeft="true"
+        android:text="Calculate" />
+
+    <TextView
+        android:id="@+id/ssid"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="30dp"
+        android:layout_toLeftOf="@+id/shortString"
+        android:text="SSID:"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <TextView
+        android:id="@+id/shortString"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/ssid"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="42dp"
+        android:text="Comparison String:"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <TextView
+        android:id="@+id/shortStringValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/shortString"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="15dp"
+        android:text="Click Calculate"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+</RelativeLayout>

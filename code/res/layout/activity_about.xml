@@ -1,0 +1,47 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".About" >
+
+    <TextView
+        android:id="@+id/useTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="28dp"
+        android:text="Using AP Verifier"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <TextView
+        android:id="@+id/use"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/useTitle"
+        android:layout_marginTop="19dp"
+        android:text="This application provides wifi access point verification.  To verify an access point, swipe the verification tag and calculate the comparison string. Verify that all devices connecting to the access point generate the same comparison string."
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <TextView
+        android:id="@+id/authorTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/use"
+        android:layout_marginTop="46dp"
+        android:text="Authors"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <TextView
+        android:id="@+id/authors"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/authorTitle"
+        android:layout_marginTop="14dp"
+        android:text="Naif Alotaibi, Jenna Kallaher, Greg Owens, David Pearson"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+</RelativeLayout>
