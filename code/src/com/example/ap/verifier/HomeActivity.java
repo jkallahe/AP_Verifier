@@ -21,10 +21,10 @@ public class HomeActivity extends Activity {
         buttonCalc.setOnClickListener(new OnClickListener()
         {
      	   public void onClick(View v){
-     		   ssc s = new ssc();
-     		   String comparison = s.get_comparison_string();
-     		   TextView text = (TextView) findViewById(R.id.shortStringValue);
-     		   text.setText(comparison);
+     		   //ssc s = new ssc();
+     		   //String comparison = s.get_comparison_string();
+     		   //TextView text = (TextView) findViewById(R.id.shortStringValue);
+     		   //text.setText(comparison);
      		   }
      	   }
         );
