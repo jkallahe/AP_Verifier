@@ -33,20 +33,23 @@ public class MifareClassicParser
 		Signature s = null;
 		try {
 			s = Signature.getInstance("SHA1withRSA");
-		} catch (NoSuchAlgorithmException e1) {
+		} 
+		catch (NoSuchAlgorithmException e1) {
 			System.out.println("Problem signing");
 			System.exit(1);;
 		};
 		try {
 			s.initSign(k);
-		} catch (InvalidKeyException e) {
+		} 
+		catch (InvalidKeyException e) {
 			System.out.println("Problem signing");
 			System.exit(1);
 		}
 		
 		try {
 			s.update(shortstring.getBytes());
-		} catch (SignatureException e) {
+		} 
+		catch (SignatureException e) {
 			System.out.println("Problem signing");
 			System.exit(1);
 		}
@@ -55,7 +58,8 @@ public class MifareClassicParser
 		byte[] sig = null;
 		try {
 			sig = s.sign();
-		} catch (SignatureException e) {
+		} 
+		catch (SignatureException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -69,7 +73,8 @@ public class MifareClassicParser
 		FileInputStream inStream = null;
 		try {
 			inStream = new FileInputStream(certfile);
-		} catch (FileNotFoundException e) {
+		} 
+		catch (FileNotFoundException e) {
 			System.out.println("Certificate reading problem");
 			System.exit(1);
 		}
@@ -80,20 +85,21 @@ public class MifareClassicParser
 		
 		try {
 			inStream.read(buff);
-		} catch (IOException e) {
+		} 
+		catch (IOException e) {
 			System.out.println("Certificate reading problem");
 			System.exit(1);
 		}
 		
 		try {
 			inStream.close();
-		} catch (IOException e) {
+		} 
+		catch (IOException e) {
 			System.out.println("Certificate reading problem");
 			System.exit(1);
 		}
 		
-		return buff;
-		
+		return buff;	
 	}
 	
 	X509Certificate readCertificate(File certfile)
@@ -101,122 +107,49 @@ public class MifareClassicParser
 		FileInputStream inStream = null;
 		try {
 			inStream = new FileInputStream(certfile);
-		} catch (FileNotFoundException e) {
+		} 
+		catch (FileNotFoundException e) {
 			System.out.println("Certificate reading problem");
 			System.exit(1);
 		}
+		
 		CertificateFactory cf = null;
+		
 		try {
 			cf = CertificateFactory.getInstance("X.509");
-		} catch (CertificateException e1) {
+		} 
+		catch (CertificateException e1) {
 			System.out.println("Certificate reading problem");
 			System.exit(1);;
 		}
+		
 		X509Certificate cert = null;
+		
 		try {
 			cert = (X509Certificate)cf.generateCertificate(inStream);
-		} catch (CertificateException e1) {
+		} 
+		catch (CertificateException e1) {
 			System.out.println("Certificate reading problem");
 			System.exit(1);
 		}
+		
 		try {
 			inStream.close();
-		} catch (IOException e) {
+		} 
+		catch (IOException e) {
 			System.out.println("Certificate reading problem");
 			System.exit(1);
 		}
 		
 		return cert;
 	}
-	
-	public boolean writeMifareClassic(Tag tag, byte[] file)
-	{
-		MifareClassic mfc = MifareClassic.get(tag);
-		FileInputStream fis = null;
-		
-		try
-		{
-			mfc.connect();
-		 
-		    
-		    byte fileByte[] = new byte[16];
-		    
 
-		    int numSectors = mfc.getSectorCount();
-		    int numBlocks = mfc.getBlockCountInSector(0);
-		    int logicBlock;
-		    
-		    
-		    // iterates the the sectors
-		    for(int sector = 0,counter = 0; sector < numSectors; sector++, counter += 16) 
-		    {
-		    	// iterates through each block within a sector and writes that block
-		    	for(int block=0; block < numBlocks; block++) 
-		    	{
-		    		logicBlock = mfc.sectorToBlock(sector) + block;
-		    		
-		    		for(int x = 0; x < 16; x++)
-		    		{
-		    			if(file.length < (counter+x))
-		    			{
-		    				fileByte[x] = file[counter+x];
-		    			}
-		    			else
-		    			{
-		    				fileByte[x] = (byte) 0;
-		    			}
-		    		}
-		 
-		    		if(sector == 0 && block == 0) 
-		    			continue;
-		    		
-		        	mfc.authenticateSectorWithKeyA(sector, MifareClassic.KEY_DEFAULT);
-		        	mfc.writeBlock(logicBlock, fileByte);
-		        }
-		    }
-		    
-		    return true;
-		}
-        catch(IOException e) 
-        { 
-        	Log.e("Read MifareClassic", "IOException while reading tag", e);        	
-        	return false;
-        }
-        finally 
-        {
-        	if (fis != null) 
-        	{
-				try 
-				{
-					fis.close();
-				}
-				catch(Exception e)
-				{
-					Log.e("Close File", "Error closing file...", e);
-				}
-        	}
-        	
-        	if (mfc != null) 
-        	{
-				try 
-				{
-					mfc.close();
-				}
-				catch(Exception e)
-				{
-					Log.e("Write MifareClassic", "Error closing tag...", e);
-				}
-        	}        	
-        }    
-	}
-	
 	//This is the code for reading MifareClassic cards, not sure if this actually works -GO 
 	public String readMifareClassic(Tag tag)
     {    
     	  MifareClassic mfc = MifareClassic.get(tag);
           
-          try 
-          {
+          try {
 	            mfc.connect();
 	            boolean authenticate = false;
 	            byte[] byteData = null;
@@ -254,13 +187,11 @@ public class MifareClassicParser
 	            mfcData = mfcData.replaceAll("[^\\x20-\\x7e]", "");
 	            return mfcData;
           }
-          catch(IOException e) 
-          { 
+          catch(IOException e) { 
              	Log.e("Read MifareClassic", "IOException while reading tag", e);        	
             	return e.getLocalizedMessage();
           }
-          finally 
-          {
+          finally {
         	  if (mfc != null) 
               {
             	  try 

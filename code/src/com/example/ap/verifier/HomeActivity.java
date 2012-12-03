@@ -59,9 +59,7 @@ public class HomeActivity extends Activity {
      	   public void onClick(View v){
      		   byte[] file = null;
      		   Tag tag = null;
-     		   TagWriter m = new TagWriter();
-     		   
-     		   
+     		   TagWriter m = new TagWriter(); 		   
      		   
      		   m.writeMifareClassic(tag, file);
      	   }
@@ -77,8 +75,6 @@ public class HomeActivity extends Activity {
      		   }
      	   }
         );
-		
-		
 	}
 
 	@Override  
@@ -123,8 +119,8 @@ public class HomeActivity extends Activity {
             
             if(techList.contains("android.nfc.tech.MifareClassic"))
             {
-            	TagWriter tw = new TagWriter();
-            	//tw.writeMifareClassic(tag);
+            	MifareClassicParser mcp = new MifareClassicParser();
+            	mcp.readMifareClassic(tag);
             }  
         }
     }      
