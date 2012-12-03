@@ -1,6 +1,9 @@
 package com.example.ap.verifier;
 
+
 import com.example.ap.comparison_strings.*;
+
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
@@ -27,6 +30,18 @@ public class HomeActivity extends Activity {
      		   //text.setText(comparison);
      		   }
      	   }
+        );
+        
+        Button buttonWriteTag = (Button) findViewById(R.id.writeTag);
+        buttonWriteTag.setOnClickListener(new OnClickListener()
+        {
+     	   public void onClick(View v){
+     		   byte[] file = null;
+     		   Tag tag = null;
+     		   MifareClassicParser m = new MifareClassicParser();
+     		   m.writeMifareClassic(tag, file);
+     	   }
+        }
         );
         
         Button buttonAbout = (Button) findViewById(R.id.about);

@@ -10,8 +10,11 @@ import android.nfc.tech.MifareClassic;
 import android.util.Log;
 
 import java.security.cert.*;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.Signature;
+import java.security.SignatureException;
 
 public class MifareClassicParser 
 {
@@ -24,12 +27,38 @@ public class MifareClassicParser
 	
 	byte[] getSignature(String shortstring)
 	{
+		
+		PrivateKey k = null;
+		
+		Signature s = null;
+		try {
+			s = Signature.getInstance("SHA1withRSA");
+		} catch (NoSuchAlgorithmException e1) {
+			System.out.println("Problem signing");
+			System.exit(1);;
+		};
+		try {
+			s.initSign(k);
+		} catch (InvalidKeyException e) {
+			System.out.println("Problem signing");
+			System.exit(1);
+		}
+		
+		try {
+			s.update(shortstring.getBytes());
+		} catch (SignatureException e) {
+			System.out.println("Problem signing");
+			System.exit(1);
+		}
+		
+		
 		byte[] sig = null;
-		
-		PrivateKey k;
-		
-		Signature s;
-		
+		try {
+			sig = s.sign();
+		} catch (SignatureException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		return sig;
 		
@@ -100,7 +129,7 @@ public class MifareClassicParser
 		return cert;
 	}
 	
-	public boolean writeMifareClassic(Tag tag, File file)
+	public boolean writeMifareClassic(Tag tag, byte[] file)
 	{
 		MifareClassic mfc = MifareClassic.get(tag);
 		FileInputStream fis = null;
@@ -109,7 +138,7 @@ public class MifareClassicParser
 		{
 			mfc.connect();
 		 
-		    fis = new FileInputStream(file);
+		    
 		    byte fileByte[] = new byte[16];
 		    
 
@@ -117,14 +146,26 @@ public class MifareClassicParser
 		    int numBlocks = mfc.getBlockCountInSector(0);
 		    int logicBlock;
 		    
+		    
 		    // iterates the the sectors
-		    for(int sector = 0; sector < numSectors; sector++) 
+		    for(int sector = 0,counter = 0; sector < numSectors; sector++, counter += 16) 
 		    {
 		    	// iterates through each block within a sector and writes that block
 		    	for(int block=0; block < numBlocks; block++) 
 		    	{
 		    		logicBlock = mfc.sectorToBlock(sector) + block;
-		    		fis.read(fileByte);
+		    		
+		    		for(int x = 0; x < 16; x++)
+		    		{
+		    			if(file.length < (counter+x))
+		    			{
+		    				fileByte[x] = file[counter+x];
+		    			}
+		    			else
+		    			{
+		    				fileByte[x] = (byte) 0;
+		    			}
+		    		}
 		 
 		    		if(sector == 0 && block == 0) 
 		    			continue;
