@@ -1,8 +1,12 @@
 package com.example.ap.verifier;
 
+<<<<<<< HEAD
 import com.example.ap.comparison_strings.*;
 
 import android.nfc.Tag;
+=======
+//import com.example.ap.comparison_strings.*;
+>>>>>>> a1206e53fce373808e2d26b4025277248e13809f
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
