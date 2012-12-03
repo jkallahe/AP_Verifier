@@ -25,6 +25,8 @@ public class MifareClassicParser
 		
 	}
 	
+	
+	
 	byte[] getSignature(String shortstring)
 	{
 		

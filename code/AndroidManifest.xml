@@ -38,7 +38,7 @@
         
         <activity
             android:name="com.example.ap.verifier.TagWriter"
-            android:label="@string/title_write_tag" >  
+            android:label="@string/title_activity_about" >  
             
 			<intent-filter>
                 <action android:name="android.nfc.action.TECH_DISCOVERED" />
@@ -46,6 +46,18 @@
             
 			<meta-data android:name="android.nfc.action.TECH_DISCOVERED"
                    android:resource="@xml/nfc_tech_filter" />			
-        </activity>            
+        </activity>     
+        
+        <!-- <activity
+            android:name="com.example.ap.verifier.MifareClassicParser"
+            android:label="@string/title_activity_about" >            
+            
+			<intent-filter>
+                <action android:name="android.nfc.action.TECH_DISCOVERED" />
+            </intent-filter>
+            
+			<meta-data android:name="android.nfc.action.TECH_DISCOVERED"
+                   android:resource="@xml/nfc_tech_filter" />			
+        </activity> -->         
     </application>
 </manifest>

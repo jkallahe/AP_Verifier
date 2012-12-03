@@ -1,10 +1,13 @@
 package com.example.ap.verifier;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.InvalidKeyException;
+import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.Signature;
@@ -12,6 +15,10 @@ import java.security.SignatureException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Arrays;
 import java.util.List;
 
@@ -23,6 +30,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.AssetManager;
 
 public class TagWriter extends Activity {
 	
@@ -64,69 +72,132 @@ public class TagWriter extends Activity {
             
             if(techList.contains("android.nfc.tech.MifareClassic"))
             {
-            	TagWriter tw = new TagWriter();
-            	//tw.writeMifareClassic(tag);
+            	AssetManager manager = getAssets();
+            	
+            	String shortstring = getShortString();
+            	byte[] sig = getSignature(shortstring);
+            	byte[] cert = readCertificateBytes();
+            	
+            	ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
+            	try {
+					outputStream.write( shortstring.getBytes() );
+					outputStream.write( sig );
+	            	outputStream.write(cert);
+				} catch (IOException e) {
+					System.exit(1);
+					System.out.println("Failed to write byte array");
+				}
+            	
+
+            	byte aggr[] = outputStream.toByteArray( );
+            	
+            	writeMifareClassic(tag, aggr);
             }  
         }
     }  	
+    
+    String getShortString()
+	{
+		String s = null;
+		
+		StringComparison c = new StringComparison();
+		s = c.getString();
+		
+		return s;
+	}
 		
 	byte[] getSignature(String shortstring)
 	{
+		AssetManager manager = getAssets();
 		
-		PrivateKey k = null;
-		Signature s = null;
+		File pkfile = new File("/Users/neo/java/Laptop_sim/files/key.der");
+		InputStream fis = null;
+		try {
+			fis = manager.open("key.pem");
+		} catch (FileNotFoundException e) {
+			System.exit(1);
+		} catch (IOException e) {
+			System.exit(1);
+		}
+		byte[] pkbytes = new byte[(int) pkfile.length()];
+		try {
+			fis.read(pkbytes);
+		} catch (IOException e) {
+			System.exit(1);
+		}
+		KeyFactory keyFactory = null;
+		try {
+			keyFactory = KeyFactory.getInstance("RSA");
+		} catch (NoSuchAlgorithmException e) {
+			System.exit(1);
+		}
+		KeySpec ks = new PKCS8EncodedKeySpec(pkbytes);
+		RSAPrivateKey pk = null;
+		try {
+			pk = (RSAPrivateKey) keyFactory.generatePrivate(ks);
+		} catch (InvalidKeySpecException e) {
+			System.exit(1);
+		}
+		String msg = shortstring;
+		Signature sigo = null;
+		try {
+			sigo = Signature.getInstance("SHA1withRSA");
+		} catch (NoSuchAlgorithmException e) {
+			System.exit(1);
+		}
+		try {
+			sigo.initSign(pk);
+		} catch (InvalidKeyException e) {
+			System.exit(1);
+		}
+		try {
+			sigo.update(msg.getBytes());
+		} catch (SignatureException e) {
+			System.exit(1);
+		}
+		byte[] signedmsg = null;
+		try {
+			signedmsg = sigo.sign();
+		} catch (SignatureException e) {
+			System.exit(1);
+		}	
 		
 		try {
-			s = Signature.getInstance("SHA1withRSA");
-		} 
-		catch (NoSuchAlgorithmException e1) {
-			System.out.println("Problem signing");
-			System.exit(1);;
-		};
-		try {
-			s.initSign(k);
-		} 
-		catch (InvalidKeyException e) {
-			System.out.println("Problem signing");
+			fis.close();
+		} catch (IOException e) {
 			System.exit(1);
 		}
 		
-		try {
-			s.update(shortstring.getBytes());
-		} 
-		catch (SignatureException e) {
-			System.out.println("Problem signing");
-			System.exit(1);
-		}
-		
-		
-		byte[] sig = null;
-		try {
-			sig = s.sign();
-		} 
-		catch (SignatureException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		return sig;
-		
+		return signedmsg;
 	}
 	
-	byte[] readCertificateBytes(File certfile)
+	byte[] readCertificateBytes()
 	{
-		FileInputStream inStream = null;
+		AssetManager manager = getAssets();
+		
+		InputStream inStream = null;
 		try {
-			inStream = new FileInputStream(certfile);
+			inStream = manager.open("server.crt");
 		} 
 		catch (FileNotFoundException e) {
 			System.out.println("Certificate reading problem");
 			System.exit(1);
+		} catch (IOException e) {
+			System.exit(1);
+		}
+				
+		int b;
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
+		try {
+			while((b= inStream.read() ) >-1)
+			{		
+				outputStream.write( (byte) b);
+			}
+		} catch (IOException e1) {
+			System.exit(-1);
 		}
 		
-		int len = (int) certfile.length();
-		
-		byte[] buff = new byte[len+1];
+		byte[] buff = outputStream.toByteArray( );
 		
 		try {
 			inStream.read(buff);
