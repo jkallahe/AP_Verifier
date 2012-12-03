@@ -2,11 +2,16 @@ package com.example.ap.verifier;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import android.nfc.Tag;
 import android.nfc.tech.MifareClassic;
 import android.util.Log;
+
+import java.security.cert.*;
+import java.security.PrivateKey;
+import java.security.Signature;
 
 public class MifareClassicParser 
 {
@@ -15,6 +20,84 @@ public class MifareClassicParser
 	{
 		
 		
+	}
+	
+	byte[] getSignature(String shortstring)
+	{
+		byte[] sig = null;
+		
+		PrivateKey k;
+		
+		Signature s;
+		
+		
+		return sig;
+		
+	}
+	
+	byte[] readCertificateBytes(File certfile)
+	{
+		FileInputStream inStream = null;
+		try {
+			inStream = new FileInputStream(certfile);
+		} catch (FileNotFoundException e) {
+			System.out.println("Certificate reading problem");
+			System.exit(1);
+		}
+		
+		int len = (int) certfile.length();
+		
+		byte[] buff = new byte[len+1];
+		
+		try {
+			inStream.read(buff);
+		} catch (IOException e) {
+			System.out.println("Certificate reading problem");
+			System.exit(1);
+		}
+		
+		try {
+			inStream.close();
+		} catch (IOException e) {
+			System.out.println("Certificate reading problem");
+			System.exit(1);
+		}
+		
+		return buff;
+		
+	}
+	
+	X509Certificate readCertificate(File certfile)
+	{
+		FileInputStream inStream = null;
+		try {
+			inStream = new FileInputStream(certfile);
+		} catch (FileNotFoundException e) {
+			System.out.println("Certificate reading problem");
+			System.exit(1);
+		}
+		CertificateFactory cf = null;
+		try {
+			cf = CertificateFactory.getInstance("X.509");
+		} catch (CertificateException e1) {
+			System.out.println("Certificate reading problem");
+			System.exit(1);;
+		}
+		X509Certificate cert = null;
+		try {
+			cert = (X509Certificate)cf.generateCertificate(inStream);
+		} catch (CertificateException e1) {
+			System.out.println("Certificate reading problem");
+			System.exit(1);
+		}
+		try {
+			inStream.close();
+		} catch (IOException e) {
+			System.out.println("Certificate reading problem");
+			System.exit(1);
+		}
+		
+		return cert;
 	}
 	
 	public boolean writeMifareClassic(Tag tag, File file)

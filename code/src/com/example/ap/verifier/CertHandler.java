@@ -2,7 +2,6 @@ package com.example.ap.verifier;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
