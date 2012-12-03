@@ -9,7 +9,6 @@ import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.security.cert.CertificateException;
@@ -33,6 +32,7 @@ import android.content.Intent;
 import android.content.res.AssetManager;
 
 public class TagWriter extends Activity {
+	private static final String TAG = "TagWriter";
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -69,14 +69,21 @@ public class TagWriter extends Activity {
             }
             
             List<String> techList = Arrays.asList(techList_array);
+            Log.v(TAG, "all of techList_string: " + techList_string);
+            Log.v(TAG, "techList: " + techList.toString());
             
             if(techList.contains("android.nfc.tech.MifareClassic"))
-            {
-            	AssetManager manager = getAssets();
-            	
+            {	
             	String shortstring = getShortString();
             	byte[] sig = getSignature(shortstring);
             	byte[] cert = readCertificateBytes();
+            	
+            	System.out.println("shortstring:" + shortstring);
+            	System.out.println("signature:" + FormatConverter.byteArrayToHexString(sig));
+            	System.out.println("cert:" + FormatConverter.byteArrayToHexString(cert));
+            	Log.v(TAG, "shortstring:" + shortstring);
+            	Log.v(TAG, "signature:" + FormatConverter.byteArrayToHexString(sig));
+            	Log.v(TAG, "cert:" + FormatConverter.byteArrayToHexString(cert));
             	
             	ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
             	try {
@@ -90,6 +97,8 @@ public class TagWriter extends Activity {
             	
 
             	byte aggr[] = outputStream.toByteArray( );
+            	
+            	Log.v(TAG, "Tag Data:" + FormatConverter.byteArrayToHexString(aggr));
             	
             	writeMifareClassic(tag, aggr);
             }  

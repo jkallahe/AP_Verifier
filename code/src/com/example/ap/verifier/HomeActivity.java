@@ -11,21 +11,19 @@ import android.nfc.Tag;
 import android.os.Bundle;
 import android.app.Activity;
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 
 public class HomeActivity extends Activity {
+	private static final String TAG = "HomeActivity";
     private NfcAdapter mNfcAdapter;  
     private IntentFilter[] mWriteTagFilters;  
-    private PendingIntent mNfcPendingIntent;  
-    private boolean silent=false;  
-    private boolean writeProtect = false;  
-    private Context context;  
+    private PendingIntent mNfcPendingIntent;   
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -104,6 +102,7 @@ public class HomeActivity extends Activity {
         
         if(NfcAdapter.ACTION_TECH_DISCOVERED.equals(action))
         {
+        	System.out.println("We have a tag");
             Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
             
             //Get tech list (tag type) from intent
@@ -118,11 +117,15 @@ public class HomeActivity extends Activity {
             }
             
             List<String> techList = Arrays.asList(techList_array);
+            Log.v(TAG, "all of techList_string: " + techList_string);
+            Log.v(TAG, "techList: " + techList.toString());
             
             if(techList.contains("android.nfc.tech.MifareClassic"))
             {
             	MifareClassicParser mcp = new MifareClassicParser();
-            	mcp.readMifareClassic(tag);
+            	String tagData = mcp.readMifareClassic(tag);
+            	System.out.println("tagData: " + tagData);
+            	Log.v(TAG, "tagData: " + tagData);
             }  
         }
     }      
