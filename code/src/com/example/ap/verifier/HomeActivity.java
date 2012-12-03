@@ -1,24 +1,45 @@
 package com.example.ap.verifier;
 
 
-import com.example.ap.comparison_strings.*;
+//import com.example.ap.comparison_strings.*;
 
+import java.util.Arrays;
+import java.util.List;
+
+import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.os.Bundle;
 import android.app.Activity;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.TextView;
 
 public class HomeActivity extends Activity {
-
+    private NfcAdapter mNfcAdapter;  
+    private IntentFilter[] mWriteTagFilters;  
+    private PendingIntent mNfcPendingIntent;  
+    private boolean silent=false;  
+    private boolean writeProtect = false;  
+    private Context context;  
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_home);
+		
+		mNfcAdapter = NfcAdapter.getDefaultAdapter(this);  
+		mNfcPendingIntent = PendingIntent.getActivity(this, 0, new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP  
+            | Intent.FLAG_ACTIVITY_CLEAR_TOP), 0);  
+  
+		IntentFilter techDetected = new IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED);  
+		
+		// Intent filters for writing to a tag  
+		mWriteTagFilters = new IntentFilter[] { techDetected };  		
 		
 		Button buttonCalc = (Button) findViewById(R.id.calculate);
         buttonCalc.setOnClickListener(new OnClickListener()
@@ -38,7 +59,10 @@ public class HomeActivity extends Activity {
      	   public void onClick(View v){
      		   byte[] file = null;
      		   Tag tag = null;
-     		   MifareClassicParser m = new MifareClassicParser();
+     		   TagWriter m = new TagWriter();
+     		   
+     		   
+     		   
      		   m.writeMifareClassic(tag, file);
      	   }
         }
@@ -57,6 +81,54 @@ public class HomeActivity extends Activity {
 		
 	}
 
+	@Override  
+	protected void onResume() 
+	{  
+		super.onResume();  
+		
+		if(mNfcAdapter != null)
+			mNfcAdapter.enableForegroundDispatch(this, mNfcPendingIntent, mWriteTagFilters, null);
+	}
+
+    @Override  
+    protected void onPause() 
+    {  
+         super.onPause();  
+         if(mNfcAdapter != null) 
+        	 mNfcAdapter.disableForegroundDispatch(this);  
+    }  
+    
+    @Override  
+    protected void onNewIntent(Intent intent) 
+    {  
+    	super.onNewIntent(intent);   
+    	String action = intent.getAction();
+        
+        if(NfcAdapter.ACTION_TECH_DISCOVERED.equals(action))
+        {
+            Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+            
+            //Get tech list (tag type) from intent
+            String[] techList_array = tag.getTechList();
+            
+            //Print out tech list to screen
+            String techList_string = "";
+            for(String tech : techList_array)
+            {
+            	techList_string += tech;
+            	techList_string += "\n";
+            }
+            
+            List<String> techList = Arrays.asList(techList_array);
+            
+            if(techList.contains("android.nfc.tech.MifareClassic"))
+            {
+            	TagWriter tw = new TagWriter();
+            	//tw.writeMifareClassic(tag);
+            }  
+        }
+    }      
+			
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
