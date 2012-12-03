@@ -21,7 +21,7 @@ import android.view.Menu;
 import android.app.Activity;
 
 public class TagWriter {
-	
+		
 	byte[] getSignature(String shortstring)
 	{
 		
