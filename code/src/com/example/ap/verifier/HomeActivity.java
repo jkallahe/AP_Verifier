@@ -57,11 +57,13 @@ public class HomeActivity extends Activity {
         buttonWriteTag.setOnClickListener(new OnClickListener()
         {
      	   public void onClick(View v){
-     		   byte[] file = null;
-     		   Tag tag = null;
-     		   TagWriter m = new TagWriter(); 		   
+     		   //byte[] file = null;
+     		   //Tag tag = null;
+     		   //TagWriter m = new TagWriter(); 		   
      		   
-     		   m.writeMifareClassic(tag, file);
+     		   //m.writeMifareClassic(tag, file);
+     		   Intent i = new Intent(HomeActivity.this, TagWriter.class); 
+     		   startActivity(i);
      	   }
         }
         );
