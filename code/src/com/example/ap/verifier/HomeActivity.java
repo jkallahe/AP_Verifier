@@ -1,6 +1,6 @@
 package com.example.ap.verifier;
 
-import com.example.ap.comparison_strings.*;
+//import com.example.ap.comparison_strings.*;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
