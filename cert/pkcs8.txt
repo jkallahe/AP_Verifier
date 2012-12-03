@@ -1,0 +1,1 @@
+openssl pkcs8 -topk8 -nocrypt -in private.pem -outform der -out private.der
