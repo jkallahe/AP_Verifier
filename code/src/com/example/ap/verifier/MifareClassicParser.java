@@ -129,7 +129,7 @@ public class MifareClassicParser
 		return cert;
 	}
 	
-	public boolean writeMifareClassic(Tag tag, File file)
+	public boolean writeMifareClassic(Tag tag, byte[] file)
 	{
 		MifareClassic mfc = MifareClassic.get(tag);
 		FileInputStream fis = null;
@@ -138,7 +138,7 @@ public class MifareClassicParser
 		{
 			mfc.connect();
 		 
-		    fis = new FileInputStream(file);
+		    
 		    byte fileByte[] = new byte[16];
 		    
 
@@ -146,14 +146,26 @@ public class MifareClassicParser
 		    int numBlocks = mfc.getBlockCountInSector(0);
 		    int logicBlock;
 		    
+		    
 		    // iterates the the sectors
-		    for(int sector = 0; sector < numSectors; sector++) 
+		    for(int sector = 0,counter = 0; sector < numSectors; sector++, counter += 16) 
 		    {
 		    	// iterates through each block within a sector and writes that block
 		    	for(int block=0; block < numBlocks; block++) 
 		    	{
 		    		logicBlock = mfc.sectorToBlock(sector) + block;
-		    		fis.read(fileByte);
+		    		
+		    		for(int x = 0; x < 16; x++)
+		    		{
+		    			if(file.length < (counter+x))
+		    			{
+		    				fileByte[x] = file[counter+x];
+		    			}
+		    			else
+		    			{
+		    				fileByte[x] = (byte) 0;
+		    			}
+		    		}
 		 
 		    		if(sector == 0 && block == 0) 
 		    			continue;
