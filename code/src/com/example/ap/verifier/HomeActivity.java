@@ -3,8 +3,10 @@ package com.example.ap.verifier;
 
 //import com.example.ap.comparison_strings.*;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
@@ -23,6 +25,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
+import com.example.ap.verifier.CertHandler.*;
 
 public class HomeActivity extends Activity {
 	private static final String TAG = "HomeActivity";
@@ -47,32 +50,9 @@ public class HomeActivity extends Activity {
         Intent intent = getIntent();
         resolveIntent(intent);
 		
-		Button buttonCalc = (Button) findViewById(R.id.calculate);
-        buttonCalc.setOnClickListener(new OnClickListener()
-        {
-     	   public void onClick(View v){
-     		   //ssc s = new ssc();
-     		   //String comparison = s.get_comparison_string();
-     		   //TextView text = (TextView) findViewById(R.id.shortStringValue);
-     		   //text.setText(comparison);
-     		   }
-     	   }
-        );
+
         
-        Button buttonWriteTag = (Button) findViewById(R.id.writeTag);
-        buttonWriteTag.setOnClickListener(new OnClickListener()
-        {
-     	   public void onClick(View v){
-     		   //byte[] file = null;
-     		   //Tag tag = null;
-     		   //TagWriter m = new TagWriter(); 		   
-     		   
-     		   //m.writeMifareClassic(tag, file);
-     		   Intent i = new Intent(HomeActivity.this, TagWriter.class); 
-     		   startActivity(i);
-     	   }
-        }
-        );
+        
         
         Button buttonAbout = (Button) findViewById(R.id.about);
         buttonAbout.setOnClickListener(new OnClickListener()
@@ -130,20 +110,46 @@ public class HomeActivity extends Activity {
             if(techList.contains("android.nfc.tech.MifareClassic"))
             {
             	MifareClassicParser mcp = new MifareClassicParser();
-            	String tagData = mcp.readMifareClassic(tag);
-            	byte[] tmp = tagData.getBytes();
-            	String res = mcp.getString(tmp);
-            	String sig = mcp.getSig(tmp);
-            	String cert = mcp.getCert(tmp);
+            	byte[] tagData = mcp.readMifareClassic(tag);
+            	System.out.println(tagData);
+            	byte[] res = mcp.getString(tagData);
+            	byte[] sig = mcp.getSig(tagData);
+            	byte[] cert = mcp.getCert(tagData);
             	
-            	/*CertHandler c = new CertHandler();
-            	CertificateFactory cf = CertificateFactory.getInstance("X.509");
-            	InputStream inputSource = new InputStream( new StringReader( cert) );
-            	X509Certificate x = (X509Certificate)cf.generateCertificate(cert);*/
+            	Log.v(TAG, "Raw Data: " + tagData.length);
+            	Log.v(TAG, "SSC: " + res);
+            	Log.v(TAG, "SSC Length: " + res.length);
+            	Log.v(TAG, "Signature: " + sig);
+            	Log.v(TAG, "Signature Length: " + sig.length);
+            	Log.v(TAG, "Cert: " + cert);
+            	Log.v(TAG, "Cert Length: " + cert.length);
             	
-            	TextView t = (TextView) findViewById(R.id.shortStringValue);
-            	t.setText(res);
-            	
+            	try
+            	{
+	            	CertHandler c = new CertHandler();
+	            	CertificateFactory cf = CertificateFactory.getInstance("X.509");
+	            	InputStream is = new ByteArrayInputStream(cert);
+	            	X509Certificate x509 = (X509Certificate)cf.generateCertificate(is);
+	            	c.set_certificate(x509);
+	            	validity valid = c.check_valid_signature(res, sig);
+	            	if(valid == validity.Valid)
+	            	{
+	                	TextView t = (TextView) findViewById(R.id.shortStringValue);
+	                	String woohoo = new String(res);
+	                	String ew = "Verified String: " + woohoo;
+	                	t.setText(ew);
+	            	}
+	            	else
+	            	{
+	                	TextView t = (TextView) findViewById(R.id.shortStringValue);
+	                	t.setText("Incorrect Certificate Signature");
+	            	}
+            	}
+            	catch (CertificateException ce) 
+            	{
+					// TODO Auto-generated catch block
+					ce.printStackTrace();
+				}           
             }  
         }
     }      
