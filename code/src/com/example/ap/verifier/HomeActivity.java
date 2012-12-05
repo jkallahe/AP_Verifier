@@ -22,7 +22,7 @@ import android.widget.Button;
 public class HomeActivity extends Activity {
 	private static final String TAG = "HomeActivity";
     private NfcAdapter mNfcAdapter;  
-    private IntentFilter[] mWriteTagFilters;  
+    private IntentFilter[] mReadTagFilters;  
     private PendingIntent mNfcPendingIntent;   
 	
 	@Override
@@ -37,7 +37,10 @@ public class HomeActivity extends Activity {
 		IntentFilter techDetected = new IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED);  
 		
 		// Intent filters for writing to a tag  
-		mWriteTagFilters = new IntentFilter[] { techDetected };  		
+		mReadTagFilters = new IntentFilter[] { techDetected };
+		
+        Intent intent = getIntent();
+        resolveIntent(intent);
 		
 		Button buttonCalc = (Button) findViewById(R.id.calculate);
         buttonCalc.setOnClickListener(new OnClickListener()
@@ -83,7 +86,7 @@ public class HomeActivity extends Activity {
 		super.onResume();  
 		
 		if(mNfcAdapter != null)
-			mNfcAdapter.enableForegroundDispatch(this, mNfcPendingIntent, mWriteTagFilters, null);
+			mNfcAdapter.enableForegroundDispatch(this, mNfcPendingIntent, mReadTagFilters, null);
 	}
 
     @Override  
@@ -94,10 +97,9 @@ public class HomeActivity extends Activity {
         	 mNfcAdapter.disableForegroundDispatch(this);  
     }  
     
-    @Override  
-    protected void onNewIntent(Intent intent) 
+    protected void resolveIntent(Intent intent) 
     {  
-    	super.onNewIntent(intent);   
+    	//super.onNewIntent(intent);   
     	String action = intent.getAction();
         
         if(NfcAdapter.ACTION_TECH_DISCOVERED.equals(action))

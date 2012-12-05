@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.Signature;
 import java.security.SignatureException;
@@ -28,29 +29,63 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.app.Activity;
+import android.app.PendingIntent;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.AssetManager;
 
 public class TagWriter extends Activity {
 	private static final String TAG = "TagWriter";
+    private NfcAdapter mNfcAdapter;  
+    private IntentFilter[] mWriteTagFilters;  
+    private PendingIntent mNfcPendingIntent;   	
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_write_tag);
+		
+		mNfcAdapter = NfcAdapter.getDefaultAdapter(this);  
+		mNfcPendingIntent = PendingIntent.getActivity(this, 0, new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP  
+            | Intent.FLAG_ACTIVITY_CLEAR_TOP), 0);  
+  
+		IntentFilter techDetected = new IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED);  
+		
+		// Intent filters for writing to a tag  
+		mWriteTagFilters = new IntentFilter[] { techDetected };
+		
+        Intent intent = getIntent();
+        resolveIntent(intent);  			
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.activity_about, menu);
+		
 		return true;
 	}
 	
+	@Override  
+	protected void onResume() 
+	{  
+		super.onResume();  
+		
+		if(mNfcAdapter != null)
+			mNfcAdapter.enableForegroundDispatch(this, mNfcPendingIntent, mWriteTagFilters, null);
+	}
+
     @Override  
-    protected void onNewIntent(Intent intent) 
+    protected void onPause() 
     {  
-    	super.onNewIntent(intent);   
+         super.onPause();  
+         if(mNfcAdapter != null) 
+        	 mNfcAdapter.disableForegroundDispatch(this);  
+    }  
+	
+    protected void resolveIntent(Intent intent) 
+    {  
+    	//super.onNewIntent(intent);   
     	String action = intent.getAction();
         
         if(NfcAdapter.ACTION_TECH_DISCOVERED.equals(action))
@@ -78,13 +113,6 @@ public class TagWriter extends Activity {
             	byte[] sig = getSignature(shortstring);
             	byte[] cert = readCertificateBytes();
             	
-            	System.out.println("shortstring:" + shortstring);
-            	System.out.println("signature:" + FormatConverter.byteArrayToHexString(sig));
-            	System.out.println("cert:" + FormatConverter.byteArrayToHexString(cert));
-            	Log.v(TAG, "shortstring:" + shortstring);
-            	Log.v(TAG, "signature:" + FormatConverter.byteArrayToHexString(sig));
-            	Log.v(TAG, "cert:" + FormatConverter.byteArrayToHexString(cert));
-            	
             	ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
             	try {
 					outputStream.write( shortstring.getBytes() );
@@ -105,15 +133,12 @@ public class TagWriter extends Activity {
         }
     }  	
     
-    String getShortString()
-	{
-		String s = null;
-		
-		StringComparison c = new StringComparison();
-		s = c.getString();
-		
-		return s;
-	}
+//    String getShortString()
+//	{
+//		String s = getString();
+//		
+//		return s;
+//	}
 		
 	byte[] getSignature(String shortstring)
 	{
@@ -342,6 +367,54 @@ public class TagWriter extends Activity {
 				}
         	}        	
         }    
-	}	
-	
+	}
+
+	public String getShortString()
+	{
+		AssetManager manager = getAssets();
+		byte[] digest = null;
+		/* reading the cert file whose path is given as first argument */
+		try {
+			InputStream fis = manager.open("server.crt");
+			
+			int b;
+			ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
+			try {
+				while((b= fis.read() ) >-1)
+				{		
+					outputStream.write( (byte) b);
+				}
+			} catch (IOException e1) {
+				System.exit(-1);
+			}
+			 
+			
+			byte[] certBytes= outputStream.toByteArray( );
+			fis.read(certBytes);
+			MessageDigest certDigest = MessageDigest.getInstance("SHA-256");
+			certDigest.update(certBytes);
+			digest = certDigest.digest();
+			fis.close();
+		}
+		catch(Exception e)
+		{
+			System.out.println("Exception Occured");
+			System.exit(1);
+		}
+		
+		String hash_val = new java.math.BigInteger(1, digest).toString(16);
+		
+		//hash_val = "d135bb84d0439dbaca32247ee573a23ea7d3c9deb2a968eb31d47c4fb45f1ef4422d6c531b5b9bd6f449ebcc449ea94d0a8f05f62130fda612da53c79659f609"; //SHA-3 hash
+		
+		Ssc ssc = new Ssc();
+		
+
+		/* Get certificate from wherever */
+		
+		/* Create hash value */
+		String output_str = ssc.get_comparison_string(hash_val);
+		
+		
+		return output_str;
+	}
 }
