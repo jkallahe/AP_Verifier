@@ -126,8 +126,6 @@ public class TagWriter extends Activity {
 
             	byte aggr[] = outputStream.toByteArray( );
             	
-            	Log.v(TAG, "Tag Data:" + FormatConverter.byteArrayToHexString(aggr));
-            	
             	writeMifareClassic(tag, aggr);
             }  
         }
@@ -144,21 +142,27 @@ public class TagWriter extends Activity {
 	{
 		AssetManager manager = getAssets();
 		
-		File pkfile = new File("/Users/neo/java/Laptop_sim/files/key.der");
 		InputStream fis = null;
 		try {
-			fis = manager.open("key.pem");
+			fis = manager.open("key.der");
 		} catch (FileNotFoundException e) {
 			System.exit(1);
 		} catch (IOException e) {
 			System.exit(1);
 		}
-		byte[] pkbytes = new byte[(int) pkfile.length()];
+		int b;
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
 		try {
-			fis.read(pkbytes);
-		} catch (IOException e) {
-			System.exit(1);
+			while((b= fis.read() ) >-1)
+			{		
+				outputStream.write( (byte) b);
+			}
+		} catch (IOException e1) {
+			System.exit(-1);
 		}
+
+		byte[] pkbytes = outputStream.toByteArray( );
+		
 		KeyFactory keyFactory = null;
 		try {
 			keyFactory = KeyFactory.getInstance("RSA");
@@ -297,7 +301,7 @@ public class TagWriter extends Activity {
 	public boolean writeMifareClassic(Tag tag, byte[] file)
 	{
 		MifareClassic mfc = MifareClassic.get(tag);
-		FileInputStream fis = null;
+
 		
 		try
 		{
@@ -313,16 +317,22 @@ public class TagWriter extends Activity {
 		    
 		    
 		    // iterates the the sectors
-		    for(int sector = 0,counter = 0; sector < numSectors; sector++, counter += 16) 
+		    for(int sector = 0,counter = 0; sector < numSectors; sector++) 
 		    {
 		    	// iterates through each block within a sector and writes that block
-		    	for(int block=0; block < numBlocks; block++) 
+		    	for(int block=0; block < numBlocks; block++, counter += 16) 
 		    	{
 		    		logicBlock = mfc.sectorToBlock(sector) + block;
 		    		
+		    		if((sector == 0 && block == 0)|| block == 3)
+		    		{
+		    			counter -=16;
+		    			continue;
+		    		}
+		    		
 		    		for(int x = 0; x < 16; x++)
 		    		{
-		    			if(file.length < (counter+x))
+		    			if(file.length > (counter+x))
 		    			{
 		    				fileByte[x] = file[counter+x];
 		    			}
@@ -332,8 +342,6 @@ public class TagWriter extends Activity {
 		    			}
 		    		}
 		 
-		    		if(sector == 0 && block == 0) 
-		    			continue;
 		    		
 		        	mfc.authenticateSectorWithKeyA(sector, MifareClassic.KEY_DEFAULT);
 		        	mfc.writeBlock(logicBlock, fileByte);
@@ -346,17 +354,11 @@ public class TagWriter extends Activity {
         	Log.e("Read MifareClassic", "IOException while reading tag", e);        	
         	return false;
         }
-        finally {
-        	if (fis != null) 
-        	{
-				try {
-					fis.close();
-				}
-				catch(Exception e) {
-					Log.e("Close File", "Error closing file...", e);
-				}
-        	}
-        	
+        catch(Exception e) { 
+        	Log.e("Read MifareClassic", "IOException while reading tag", e);        	
+        	return false;
+        }		
+        finally {       
         	if (mfc != null) 
         	{
 				try {

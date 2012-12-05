@@ -3,6 +3,10 @@ package com.example.ap.verifier;
 
 //import com.example.ap.comparison_strings.*;
 
+import java.io.InputStream;
+import java.io.StringReader;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.List;
 
@@ -18,6 +22,7 @@ import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.TextView;
 
 public class HomeActivity extends Activity {
 	private static final String TAG = "HomeActivity";
@@ -126,8 +131,19 @@ public class HomeActivity extends Activity {
             {
             	MifareClassicParser mcp = new MifareClassicParser();
             	String tagData = mcp.readMifareClassic(tag);
-            	System.out.println("tagData: " + tagData);
-            	Log.v(TAG, "tagData: " + tagData);
+            	byte[] tmp = tagData.getBytes();
+            	String res = mcp.getString(tmp);
+            	String sig = mcp.getSig(tmp);
+            	String cert = mcp.getCert(tmp);
+            	
+            	/*CertHandler c = new CertHandler();
+            	CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            	InputStream inputSource = new InputStream( new StringReader( cert) );
+            	X509Certificate x = (X509Certificate)cf.generateCertificate(cert);*/
+            	
+            	TextView t = (TextView) findViewById(R.id.shortStringValue);
+            	t.setText(res);
+            	
             }  
         }
     }      

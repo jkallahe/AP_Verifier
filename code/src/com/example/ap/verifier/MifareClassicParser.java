@@ -145,6 +145,55 @@ public class MifareClassicParser
 		
 		return cert;
 	}
+	
+	public String getString(byte[] data)
+	{
+		String c = "";
+		byte[] aggr = new byte[8];
+		
+		for(int i = 0; i < 8; i++){
+			aggr[i] = data[i];
+		}
+		
+		c = aggr.toString();
+		
+		return c;
+		
+	}
+	
+	public String getCert(byte[] data)
+	{
+		String res = "";
+		
+		String c = "";
+		byte[] aggr = new byte[631];
+		
+		for(int i = 0; i < 631; i++){
+			aggr[i] = data[8+64+i];
+		}
+		
+		c = aggr.toString();
+		
+		return res;
+		
+	}
+	
+	public String getSig(byte[] data)
+	{
+		String res = "";
+		
+		String c = "";
+		byte[] aggr = new byte[8];
+		
+		for(int i = 0; i < 64; i++){
+			aggr[i] = data[8+i];
+		}
+		
+		c = aggr.toString();
+		
+		return res;
+		
+	}
 
 	//This is the code for reading MifareClassic cards, not sure if this actually works -GO 
 	public String readMifareClassic(Tag tag)
@@ -155,7 +204,7 @@ public class MifareClassicParser
 	            mfc.connect();
 	            boolean authenticate = false;
 	            byte[] byteData = null;
-	            String mfcData = null;
+	            String mfcData = "";
 	            
 	            //get the number of sectors the card has and loop through them
 	            int numSectors = mfc.getSectorCount();
@@ -174,6 +223,11 @@ public class MifareClassicParser
 	                	blockIndex = mfc.sectorToBlock(sector);
 	                    for(int block = 0; block < numBlocks; block++) 
 	                    {
+	                    	if((sector == 0 && block == 0) || block == 3)
+	                    	{
+	                    		blockIndex++;
+	                    		continue;
+	                    	}
 	                        //read the block
 	                        byteData = mfc.readBlock(blockIndex);    
 	                        blockIndex++;
@@ -186,7 +240,6 @@ public class MifareClassicParser
 	                }
 	            }
 	            
-	            mfcData = mfcData.replaceAll("[^\\x20-\\x7e]", "");
 	            return mfcData;
           }
           catch(IOException e) { 
